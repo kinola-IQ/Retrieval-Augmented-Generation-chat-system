@@ -4,6 +4,7 @@ from transformers import pipeline
 from tenacity import retry, wait_random_exponential, stop_after_attempt
 from ..utils.config import huggingface_config
 
+
 class ModelProvider(ABC):
     """Abstract base class for model providers."""
 
@@ -17,15 +18,15 @@ class HUGGINGFACE(ModelProvider):
     """Hugging Face model provider (synchronous)."""
 
     _loaded = False
-
-    def __init__(self, **kwargs):
-        # huggingface_config should return (model_name, task) or (model_name, task, ...)
+    def __init__(self):
+        # huggingface_config should return (model_name, task, ...)
         cfg = huggingface_config()
         if not cfg or len(cfg) < 2:
-            raise ValueError("huggingface_config must return at least (model_name, task)")
+            raise ValueError(
+                "huggingface_config must return at least (model_name, task)")
         # assign explicitly
-        self.model_name = cfg[0]
-        self.task = cfg[1]
+        self.model_name = cfg[1]
+        self.task = cfg[2]
         self.pipeline = None
 
     @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(5))
@@ -40,12 +41,14 @@ class HUGGINGFACE(ModelProvider):
         # Fast path: already loaded
         if HUGGINGFACE._loaded and self.pipeline is not None:
             return self.pipeline
-        
         try:
             pipe = self._create_pipeline()
         except Exception as err:
             # raise a clear exception so callers can handle it
-            raise RuntimeError(f"Could not load Hugging Face model '{self.model_name}': {err}") from err
+            raise RuntimeError(
+                f"Could not load Hugging Face model \
+                    '{self.model_name}': {err}"
+                ) from err
 
         # store on instance and mark class as loaded
         self.pipeline = pipe
