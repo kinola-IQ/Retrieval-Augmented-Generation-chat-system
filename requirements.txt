@@ -1,6 +1,6 @@
 fastapi==0.104.1
 uvicorn==0.24.0
-transformers==4.36.2
+transformers==5.0.0rc3
 tenacity==8.2.3
 python-dotenv==1.0.0
 langchain==0.1.0
