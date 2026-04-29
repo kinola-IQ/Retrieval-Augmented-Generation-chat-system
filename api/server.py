@@ -5,21 +5,24 @@ The application defines an endpoint that accepts a prompt and returns the genera
 import uvicorn
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
+from pinecone import Pinecone
 from tenacity import (
     retry,
     wait_random_exponential,
     stop_after_attempt)
 
 from api.routes.bot import router
+from ..core.utils.startup import make_connections
 
 
 # making resources available upon startup
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """initializes resources on startup"""
-    # Initialize resources here (e.g., database connections, API clients)
+    # Initialize resources here
+    await make_connections()
     yield app
-    # Clean up resources here (e.g., close database connections)
+    # Clean up resources here
 
 
 # api client
