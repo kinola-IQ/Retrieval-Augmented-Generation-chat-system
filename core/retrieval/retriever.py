@@ -9,6 +9,8 @@ resources = get_resources()
 # so we make it available at the module level
 vector_db = resources["vector_db"]
 
+
+# retrieves context to make the response knowledgable
 def retrieve_context(query: str, top_k: int = 5):
     """retrieves relevant context for a given query"""
     # perform retrieval using the vector database
