@@ -14,7 +14,11 @@ def huggingface_config():
     model_name = os.environ['HUGGINGFACE_MODEL_NAME']
     task = os.environ['HUGGINGFACE_TASK']
     embedding_model = os.environ['HUGGINGFACE_EMBEDDING_MODEL']
-    return api_key, model_name, task, embedding_model
+    return {
+        'api key': api_key,
+        'model': model_name,
+        'task': task,
+        'embedding model': embedding_model}
 
 
 # pinecone config
@@ -23,4 +27,11 @@ def pinecone_config():
     api_key = os.environ["PINECONE_API_KEY"]
     environment = os.environ["PINECONE_ENVIRONMENT"]
     index_name = os.environ["PINECONE_INDEX_NAME"]
-    return api_key, environment, index_name
+    namespace = os.environ["PINECONE_NAMESPACE"]
+    index = os.environ['PINECONE_INDEX']
+    return {
+        'api key': api_key,
+        'environment': environment,
+        'index': index_name,
+        'namespace': namespace,
+        'index': index}

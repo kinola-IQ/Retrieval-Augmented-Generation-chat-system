@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from transformers import pipeline
 from tenacity import retry, wait_random_exponential, stop_after_attempt
 from ..utils.config import huggingface_config
-
+from ..utils.helpers import timer
 
 class ModelProvider(ABC):
     """Abstract base class for model providers."""
@@ -34,6 +34,7 @@ class HUGGINGFACE(ModelProvider):
         """Internal helper that actually constructs the transformers pipeline."""
         return pipeline(self.task, model=self.model_name)
 
+    @timer
     def load_model(self):
         """
         Public method to load the model into self.pipeline.

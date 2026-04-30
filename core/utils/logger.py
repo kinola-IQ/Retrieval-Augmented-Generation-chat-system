@@ -6,7 +6,7 @@ from logging.handlers import RotatingFileHandler
 
 # Create a rotating file handler
 handler = RotatingFileHandler(
-    "app.log",        # log file name
+    "system.log",        # log file name
     maxBytes=10000,    # rotate after ~10KB
     backupCount=5     # keep 5 old log files
 )
