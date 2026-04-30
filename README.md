@@ -1,7 +1,6 @@
 # Retrieval-Augmented Generation Chatbot
 
-![RAG System Plan](https://github.com/kinola-IQ/Retrieval-Augmented-Generation-chat-system/blob/e3f604498b18fe8db22151436c2c84c3049ec38e/Design%20plans/RAG%20system%20design.png)
-
+![RAG System Plan](https://github.com/kinola-IQ/Retrieval-Augmented-Generation-chat-system/blob/852601f22e7b7f2872801ad5dd7d5e5bb0f03f34/System%20Design)
 ## Overview
 
 This repository contains a prototype RAG chatbot backend. It is designed as a FastAPI service that can:
