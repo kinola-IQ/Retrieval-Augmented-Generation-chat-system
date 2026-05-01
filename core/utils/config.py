@@ -26,12 +26,10 @@ def pinecone_config():
     """serves configs for pinecone vector database"""
     api_key = os.environ["PINECONE_API_KEY"]
     environment = os.environ["PINECONE_ENVIRONMENT"]
-    index_name = os.environ["PINECONE_INDEX_NAME"]
     namespace = os.environ["PINECONE_NAMESPACE"]
     index = os.environ['PINECONE_INDEX']
     return {
         'api key': api_key,
         'environment': environment,
-        'index': index_name,
         'namespace': namespace,
         'index': index}

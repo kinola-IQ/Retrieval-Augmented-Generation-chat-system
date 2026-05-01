@@ -2,6 +2,8 @@
 from abc import ABC, abstractmethod
 from transformers import pipeline
 from tenacity import retry, wait_random_exponential, stop_after_attempt
+
+# custom modules
 from ..utils.config import huggingface_config
 from ..utils.helpers import timer
 
@@ -18,6 +20,7 @@ class HUGGINGFACE(ModelProvider):
     """Hugging Face model provider (synchronous)."""
 
     _loaded = False
+
     def __init__(self):
         # huggingface_config should return (model_name, task, ...)
         cfg = huggingface_config()
@@ -25,8 +28,8 @@ class HUGGINGFACE(ModelProvider):
             raise ValueError(
                 "huggingface_config must return at least (model_name, task)")
         # assign explicitly
-        self.model_name = cfg[1]
-        self.task = cfg[2]
+        self.model_name = cfg['model']
+        self.task = cfg['task']
         self.pipeline = None
 
     @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(5))

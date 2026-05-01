@@ -42,7 +42,7 @@ def get_resources():
         raise ValueError(
             "Vector database connection has not been established."
             )
-    return VECTOR_DB
+    return {"vector_db": VECTOR_DB}
 
 
 def connection_success():
