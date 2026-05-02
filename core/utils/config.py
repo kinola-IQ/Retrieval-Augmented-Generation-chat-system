@@ -14,11 +14,13 @@ def huggingface_config():
     model_name = os.environ['HUGGINGFACE_MODEL_NAME']
     task = os.environ['HUGGINGFACE_TASK']
     embedding_model = os.environ['HUGGINGFACE_EMBEDDING_MODEL']
+    eval_model = os.environ['HUGGINGFACE_EVAL_MODEL']
     return {
         'api key': api_key,
         'model': model_name,
         'task': task,
-        'embedding model': embedding_model}
+        'embedding model': embedding_model,
+        'evaluation model': eval_model}
 
 
 # pinecone config

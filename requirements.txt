@@ -6,6 +6,8 @@ python-dotenv>=1.2.2
 langchain>=0.2.5
 langchain-community>=0.3.27
 langchain-experimental>=0.0.61
-tiktoken==0.5.2
-pydantic==2.5.0
+tiktoken>=0.5.2
+pydantic>=2.13.3
 pytest>=9.0.3
+ragas>=0.4.3
+langsmith>=0.8.0
