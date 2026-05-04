@@ -1,13 +1,8 @@
-"""API server entry point"""
-
-"""This is a simple FastAPI application that uses the Hugging Face Inference API to generate text based on a given prompt.
-The application defines an endpoint that accepts a prompt and returns the generated text."""
-
+"""FastAPI entry point: RAG chat and health routes under /v1."""
 
 import uvicorn
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
-from pinecone import Pinecone
 from tenacity import (
     retry,
     wait_random_exponential,
@@ -15,7 +10,7 @@ from tenacity import (
 
 
 from ..core.utils.startup import make_connections
-from ..routes.chatbot import router
+from .routes.chatbot import router
 
 # making resources available upon startup
 @asynccontextmanager

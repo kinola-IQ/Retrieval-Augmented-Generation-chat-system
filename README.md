@@ -1,106 +1,109 @@
-# Retrieval-Augmented Generation Chatbot
+# Retrieval-Augmented Generation (RAG) Chatbot
 
-![RAG System Plan](https://github.com/kinola-IQ/Retrieval-Augmented-Generation-chat-system/blob/main/Design%20plans/RAG%20system%20design.png)
+A FastAPI backend that answers questions using **retrieval from a Pinecone vector index** and **local text generation** via Hugging Face [Transformers](https://huggingface.co/docs/transformers) pipelines. PDFs are chunked with LangChain (semantic or recursive splitting), embedded with Hugging Face embedding models, and upserted into Pinecone for similarity search at query time.
 
-## Overview
+![RAG system design](Design%20plans/System%20Design.png)
 
-This repository contains a prototype RAG chatbot backend. It is designed as a FastAPI service that can:
+## What it does
 
-- load Hugging Face text-generation models with `transformers`
-- ingest and split PDF documents for embeddings
-- generate embeddings via Hugging Face embedding models
-- expose API routes under `/v1`
-- support vector DB configuration patterns (Pinecone config is present but may require implementation)
+1. **Ingestion** — Load PDFs, split into chunks, embed with `HuggingFaceEmbeddings`, upsert vectors and metadata (`source`, `text`) into a Pinecone namespace.
+2. **Chat** — Embed the user prompt, query Pinecone for top‑k chunks, build a grounded prompt, run the configured generation model, return **answer text** plus **source citations** (text, source file, score).
+3. **Health** — Report whether startup initialization (Pinecone client) completed successfully.
 
-## Architecture
+## API (`/v1`)
 
-- `api/server.py`: FastAPI application entry point and app factory.
-- `api/routes/chatbot.py`: router stub for chatbot-related endpoints.
-- `core/generation/llm.py`: wrapper around Hugging Face model loading and inference pipeline.
-- `core/retrieval/embeddings.py`: PDF loading, document splitting, query splitting, and embedding creation.
-- `core/retrieval/vector_store.py`: vector store implementation.
-- `core/utils/config.py`: centralized environment variable configuration for Hugging Face and Pinecone.
-- `scripts/ingest_data.py`: script for preprocessing and indexing documents.
+| Method | Path | Description |
+|--------|------|---------------|
+| `POST` | `/v1/chat` | JSON body: `{ "prompt": "<user question>" }`. Response: `{ "response": "<answer>", "sources": [ { "text", "source", "score" }, ... ] }`. |
+| `GET` | `/v1/services/health` | Returns `{ "status", "service", "services_initialized" }` when dependencies are ready; `500` / `408` on failure or timeout. |
+
+Request and response shapes are defined in `api/middleware/schema.py` (`UserRequest`, `ChatResponse`).
+
+## Project layout
+
+| Path | Role |
+|------|------|
+| `api/server.py` | FastAPI app factory, lifespan hook, mounts routes under `/v1`. |
+| `api/routes/chatbot.py` | `/chat` and `/services/health` handlers. |
+| `api/middleware/schema.py` | Pydantic models for API I/O. |
+| `core/generation/rag_pipeline.py` | End-to-end RAG: retrieve → prompt → generate → format sources. |
+| `core/generation/llm.py` | Hugging Face `pipeline` wrapper with retries (`HUGGINGFACE` provider). |
+| `core/retrieval/retriever.py` | Query embedding and vector similarity search against the live index. |
+| `core/retrieval/embeddings.py` | PDF loading (`PyPDFLoader`), chunking, batch embedding for ingestion. |
+| `core/retrieval/vectore_store.py` | `VectorStore` wrapper around Pinecone (query, upsert, delete, stats). |
+| `core/utils/config.py` | Environment-based config for Hugging Face and Pinecone. |
+| `core/utils/startup.py` | Startup connection handling and shared `VECTOR_DB` client. |
+| `scripts/ingest_data.py` | Batch and parallel ingestion into Pinecone. |
+| `scripts/benchmark.py` | Placeholder for evaluation / benchmarking. |
+| `tests/` | Test modules (`test_api`, `test_generation`, `test_retrieval`); many are stubs or mocks. |
+
+Sample data is tracked with **DVC** under `data/raw/` (see `.dvc` and `*.dvc` files).
 
 ## Dependencies
 
-The repository specifies minimum versions for dependencies:
-
-- `fastapi>=0.104.1`
-- `uvicorn>=0.24.0`
-- `transformers>=5.0.0rc3`
-- `tenacity>=8.2.3`
-- `python-dotenv>=1.2.2`
-- `langchain>=0.2.5`
-- `langchain-community>=0.3.27`
-- `langchain-experimental>=0.0.61`
-- `tiktoken>=0.5.2`
-- `pydantic>=2.13.3`
-- `pytest>=9.0.3`
-- `ragas>=0.4.3`
-- `langsmith>=0.8.0`
-
-Install all dependencies with:
+Install from the repository root:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## Environment Variables
+The code also imports the **Pinecone** Python client (`from pinecone import Pinecone`). If it is not pulled in transitively, install it explicitly (see [Pinecone Python SDK](https://docs.pinecone.io/guides/get-started/install)).
 
-Create a `.env` file or export these variables before running the app:
+Pinned / declared in `requirements.txt` include FastAPI, Uvicorn, Transformers, LangChain community + experimental, tiktoken, Pydantic, pytest, Ragas, LangSmith, tenacity, and python-dotenv. **PyTorch** (or another backend supported by your chosen models) is required at runtime for Transformers and embedding models.
+
+## Environment variables
+
+Create a `.env` file in the project root (or export variables). All of the following are read in `core/utils/config.py`; missing keys raise at access time.
 
 ```env
-HUGGINGFACE_API_KEY=<your-huggingface-api-key>
-HUGGINGFACE_MODEL_NAME=<model-name>
-HUGGINGFACE_TASK=<task-name>
-HUGGINGFACE_EMBEDDING_MODEL=<embedding-model-name>
-HUGGINGFACE_EVAL_MODEL=<eval-model-name>
+# Hugging Face — generation, embeddings, and optional eval model name
+HUGGINGFACE_API_KEY=<token>
+HUGGINGFACE_MODEL_NAME=<generative-model-id>
+HUGGINGFACE_TASK=text-generation
+HUGGINGFACE_EMBEDDING_MODEL=<embedding-model-id>
+HUGGINGFACE_EVAL_MODEL=<eval-model-id>
 
-PINECONE_API_KEY=<your-pinecone-api-key>
-PINECONE_ENVIRONMENT=<pinecone-environment>
-PINECONE_INDEX=<pinecone-index>
-PINECONE_NAMESPACE=<pinecone-namespace>
+# Pinecone
+PINECONE_API_KEY=<key>
+PINECONE_ENVIRONMENT=<environment>
+PINECONE_INDEX=<index-name>
+PINECONE_NAMESPACE=<namespace>
 ```
 
-## Running the API
+Use the same embedding model for ingestion and retrieval so query vectors match the index.
 
-Start the API server with Uvicorn:
+## Run the API
+
+From the **repository root** (so `api` and `core` resolve as packages):
 
 ```bash
 uvicorn api.server:server --reload --host 127.0.0.1 --port 8000
 ```
 
-The API is mounted under `/v1`.
+The ASGI app instance is named `server` in `api/server.py`.
 
-## Data Ingestion
+## Ingest documents
 
-To preprocess and index documents:
+`scripts/ingest_data.py` pulls the live Pinecone client via `get_resources()` at import time, which matches the object initialized in the API lifespan (`core.utils.startup.make_connections`). In practice you either need that initialization to have run first, or you should call `make_connections()` (async) before importing the ingest module, then invoke `ingest_in_batches` / `ingest_in_parallel` with your PDF path and display name.
+
+From the repo root, imports use parent-package paths (`from ..core...`); run ingest logic as a module so `..` resolves to the project root:
 
 ```bash
-python scripts/ingest_data.py
+python -m scripts.ingest_data
 ```
 
-## Running Tests
+If the module exits immediately on import because `VECTOR_DB` is unset, initialize Pinecone the same way `api/server.py` does in `lifespan`, then run your ingestion calls (or add a small `__main__` block that awaits `make_connections()` before importing heavy logic).
 
-Run the test suite with pytest:
+## Tests
 
 ```bash
 pytest
 ```
 
-## Project Status
+CI runs **Pylint** on Python 3.8–3.10 (`.github/workflows/pylint.yml`).
 
-- `api/routes/chatbot.py` currently defines an empty router and does not expose any endpoint implementations yet.
-- `core/generation/llm.py` sets up a Hugging Face pipeline with retry support.
-- `core/retrieval/embeddings.py` supports PDF loading and document/query splitting via LangChain.
-- `core/utils/config.py` requires the specified environment variables and will raise if they are missing.
+## Status and notes
 
-## Notes
-
-- The repository is currently a scaffolding for a RAG pipeline and may require additional implementation in route definitions and vector store integration.
-- `api/server.py` uses FastAPI lifecycle management and a retry decorator around app creation.
-
-## Test Coverage
-
-Basic test files exist in `tests/test_api.py`, `tests/test_generation.py`, and `tests/test_retrieval.py`, but the current repository state contains placeholder implementations only.
+- **Implemented:** RAG pipeline, chat and health routes, PDF chunking and embedding utilities, Pinecone-oriented ingestion and vector wrapper, structured logging and helpers (timeouts, timers).
+- **Thin / placeholder:** `scripts/benchmark.py`, `api/middleware/auth.py`, and several test files are minimal stubs.
+- **Operational detail:** Ensure your Pinecone index exists, dimensions match your embedding model, and namespaces used at ingest match those used in `RAGPipeline` / config before expecting useful chat results.
