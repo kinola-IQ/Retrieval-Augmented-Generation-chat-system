@@ -5,10 +5,13 @@ from .llm import HUGGINGFACE
 from ..retrieval.retriever import retrieve_context
 from ..utils.logger import logger
 from ..utils.helpers import timer
+from ..utils.config import pinecone_config
 
 
 class RAGPipeline:
     """Retrieval-Augmented Generation pipeline combining retrieval and generation."""
+    VECTOR_DB_RESOURCES = pinecone_config()
+    NAMESPACE = VECTOR_DB_RESOURCES['namespace']
 
     def __init__(self):
         """Initialize the RAG pipeline with model and retriever."""
@@ -16,7 +19,9 @@ class RAGPipeline:
         self.generator.load_model()
 
     @timer
-    def generate_answer(self, query: str, namespace: str, top_k: int = 5) -> Dict[str, Any]:
+    def generate_answer(
+            self, query: str, namespace: str = RAGPipeline().NAMESPACE,
+            top_k: int = 5) -> Dict[str, Any]:
         """Generate an answer using retrieval-augmented generation.
 
         Args:
@@ -46,8 +51,8 @@ class RAGPipeline:
                 'sources': sources
             }
 
-        except Exception as e:
-            logger.error("RAG pipeline failed: %s", e)
+        except Exception as exec:
+            logger.error("RAG pipeline failed: %s", exec)
             raise
 
     def _build_context(self, retrieved_docs: List[Dict[str, Any]]) -> str:
