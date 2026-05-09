@@ -26,7 +26,7 @@ FastAPI backend for question answering with retrieval from Pinecone and generati
 | `core/utils/config.py` | Environment-backed configuration access. |
 | `core/utils/startup.py` | Shared connection bootstrap and readiness state. |
 | `scripts/ingest_data.py` | Sequential and parallel ingestion functions. |
-| `scripts/benchmark.py` | Evaluation scaffold. |
+| `scripts/benchmark.py` | Correctness evaluation script with row-level error handling and safe score normalization. |
 | `tests/` | Test modules for generation/retrieval plus API test placeholder. |
 
 Sample document artifacts are tracked with DVC under `data/raw/`.
@@ -83,7 +83,7 @@ uvicorn api.server:server --reload --host 127.0.0.1 --port 8000
 
 The ASGI app variable is `server` in `api/server.py`.
 
-## API surface (intended)
+## API surface
 
 `api/routes/chatbot.py` defines:
 
@@ -126,5 +126,6 @@ CI linting is configured in `.github/workflows/pylint.yml` and currently runs Py
 
 - Core retrieval and generation flow is implemented.
 - Ingestion utilities are implemented (sequential and async upsert patterns).
-- Some components are placeholders or thin (`api/middleware/auth.py`, `scripts/benchmark.py`, `tests/test_api.py`).
+- `scripts/benchmark.py` now includes defensive error handling (initialization guards, row-level exception handling, and file-level failure handling).
+- Some components are placeholders or thin (`api/middleware/auth.py`, `tests/test_api.py`).
 - Operational correctness depends on Pinecone index compatibility with your embedding model and namespace configuration consistency.
