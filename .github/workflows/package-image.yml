@@ -30,20 +30,20 @@ jobs:
       - name: Build image
         run: |
           docker build \
-            -t ghcr.io/kinola-iq/Motocura-chatbot-backend:${{ github.sha }} \
-            -t ghcr.io/kinola-iq/Motocura-chatbot-backend:latest \
-            -t ${{ secrets.DOCKER_USERNAME }}/Motocura-chatbot-backend:${{ github.sha }} \
-            -t ${{ secrets.DOCKER_USERNAME }}/Motocura-chatbot-backend:latest \
+            -t ghcr.io/kinola-iq/motocura-chatbot-backend:${{ github.sha }} \
+            -t ghcr.io/kinola-iq/motocura-chatbot-backend:latest \
+            -t ${{ secrets.DOCKER_USERNAME }}/motocura-chatbot-backend:${{ github.sha }} \
+            -t ${{ secrets.DOCKER_USERNAME }}/motocura-chatbot-backend:latest \
             .
 
       # Push to GitHub Container Registry
       - name: Push to GitHub Container Registry
         run: |
-          docker push ghcr.io/kinola-iq/Motocura-chatbot-backend:${{ github.sha }}
-          docker push ghcr.io/kinola-iq/Motocura-chatbot-backend:latest
+          docker push ghcr.io/kinola-iq/motocura-chatbot-backend:${{ github.sha }}
+          docker push ghcr.io/kinola-iq/motocura-chatbot-backend:latest
 
       # Push to Docker Hub
       - name: Push to Docker Hub
         run: |
-          docker push ${{ secrets.DOCKER_USERNAME }}/Motocura-chatbot-backend:${{ github.sha }}
-          docker push ${{ secrets.DOCKER_USERNAME }}/Motocura-chatbot-backend:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/motocura-chatbot-backend:${{ github.sha }}
+          docker push ${{ secrets.DOCKER_USERNAME }}/motocura-chatbot-backend:latest
