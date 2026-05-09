@@ -1,65 +1,59 @@
 # Retrieval-Augmented Generation (RAG) Chatbot
 
-A FastAPI backend that answers questions using **retrieval from a Pinecone vector index** and **local text generation** via Hugging Face [Transformers](https://huggingface.co/docs/transformers) pipelines. PDFs are chunked with LangChain (semantic or recursive splitting), embedded with Hugging Face embedding models, and upserted into Pinecone for similarity search at query time. The primary generation backend is the `HUGGINGFACE` pipeline; Google Generative AI can optionally be wired in via LangChain if you set the corresponding environment variables.
+FastAPI backend for question answering with retrieval from Pinecone and generation through Hugging Face models. The system ingests PDFs, chunks text with LangChain utilities, embeds chunks, stores vectors in Pinecone, and uses retrieved context to ground model responses.
 
 ![RAG system design](Design%20plans/System%20Design.png)
 
-## What it does
+## What this repository contains
 
-1. **Ingestion** — Load PDFs, split into chunks, embed with `HuggingFaceEmbeddings`, upsert vectors and metadata (`source`, `text`) into a Pinecone namespace.
-2. **Chat** — Embed the user prompt, query Pinecone for top‑k chunks, build a grounded prompt, run the configured generation model, return **answer text** plus **source citations** (text, source file, score).
-3. **Health** — Report whether startup initialization (Pinecone client) completed successfully.
-
-## API (`/v1`)
-
-| Method | Path | Description |
-|--------|------|---------------|
-| `POST` | `/v1/chat` | JSON body: `{ "prompt": "<user question>" }`. Response: `{ "response": "<answer>", "sources": [ { "text", "source", "score" }, ... ] }`. |
-| `GET` | `/v1/services/health` | Returns `{ "status", "service", "services_initialized" }` when dependencies are ready; `500` / `408` on failure or timeout. |
-
-Request and response shapes are defined in `api/middleware/schema.py` (`UserRequest`, `ChatResponse`).
+1. **Ingestion pipeline**: PDF loading, chunking, embedding creation, and Pinecone upsert.
+2. **RAG chat pipeline**: query embedding, similarity search, prompt construction, answer generation, and source packaging.
+3. **FastAPI service**: app startup/lifespan management, chat route, and health route.
+4. **CI + containerization**: Pylint workflow and image build/publish workflow.
 
 ## Project layout
 
-| Path | Role |
-|------|------|
-| `api/server.py` | FastAPI app factory, lifespan hook, mounts routes under `/v1`. |
-| `api/routes/chatbot.py` | `/chat` and `/services/health` handlers. |
-| `api/middleware/schema.py` | Pydantic models for API I/O. |
-| `core/generation/rag_pipeline.py` | End-to-end RAG: retrieve → prompt → generate → format sources. |
-| `core/generation/llm.py` | Hugging Face `pipeline` wrapper with retries (`HUGGINGFACE` provider). |
-| `core/retrieval/retriever.py` | Query embedding and vector similarity search against the live index. |
-| `core/retrieval/embeddings.py` | PDF loading (`PyPDFLoader`), chunking, batch embedding for ingestion. |
-| `core/retrieval/vectore_store.py` | `VectorStore` wrapper around Pinecone (query, upsert, delete, stats). |
-| `core/utils/config.py` | Environment-based config for Hugging Face and Pinecone. |
-| `core/utils/startup.py` | Startup connection handling and shared `VECTOR_DB` client. |
-| `scripts/ingest_data.py` | Batch and parallel ingestion into Pinecone. |
-| `scripts/benchmark.py` | Placeholder for evaluation / benchmarking. |
-| `tests/` | Test modules (`test_api`, `test_generation`, `test_retrieval`); many are stubs or mocks. |
+| Path | Purpose |
+|------|---------|
+| `api/server.py` | FastAPI app creation and startup lifespan (`make_connections`). |
+| `api/routes/chatbot.py` | Chat and health endpoint handlers. |
+| `api/middleware/schema.py` | `UserRequest` and `ChatResponse` models. |
+| `core/generation/rag_pipeline.py` | Main retrieve -> prompt -> generate orchestration. |
+| `core/generation/llm.py` | Hugging Face model/pipeline wrapper. |
+| `core/retrieval/retriever.py` | Query embedding + Pinecone similarity search. |
+| `core/retrieval/embeddings.py` | PDF loading/chunking + embedding generation. |
+| `core/retrieval/vectore_store.py` | Vector DB wrapper around Pinecone operations. |
+| `core/utils/config.py` | Environment-backed configuration access. |
+| `core/utils/startup.py` | Shared connection bootstrap and readiness state. |
+| `scripts/ingest_data.py` | Sequential and parallel ingestion functions. |
+| `scripts/benchmark.py` | Evaluation scaffold. |
+| `tests/` | Test modules for generation/retrieval plus API test placeholder. |
 
-Sample data is tracked with **DVC** under `data/raw/` (see `.dvc` and `*.dvc` files).
+Sample document artifacts are tracked with DVC under `data/raw/`.
 
-## Dependencies
+## Install
 
-Install from the repository root:
+From the repository root:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-The code also imports the **Pinecone** Python client (`from pinecone import Pinecone` in `core/retrieval/vectore_store.py`). If it is not pulled in transitively, install it explicitly (see [Pinecone Python SDK](https://docs.pinecone.io/guides/get-started/install)).
+If Pinecone is not installed transitively in your environment, install the client explicitly:
 
-Pinned / declared in `requirements.txt` include FastAPI, Uvicorn, Transformers, LangChain community + experimental, tiktoken, Pydantic, pytest, Ragas, LangSmith, tenacity, and python-dotenv. **PyTorch** (or another backend supported by your chosen models) is required at runtime for Transformers and embedding models.
+```bash
+pip install pinecone
+```
 
-## Environment variables
+## Required environment variables
 
-Create a `.env` file in the project root (or export variables). All of the following are read in `core/utils/config.py`; missing keys raise at access time.
+Configuration is loaded in `core/utils/config.py` using `os.environ[...]` (missing keys will raise errors immediately when accessed).
 
 ```env
-# Hugging Face — generation, embeddings, and optional eval model name
+# Hugging Face
 HUGGINGFACE_API_KEY=<token>
 HUGGINGFACE_MODEL_NAME=<generative-model-id>
-HUGGINGFACE_TASK=text-generation
+HUGGINGFACE_TASK=<pipeline-task>
 HUGGINGFACE_EMBEDDING_MODEL=<embedding-model-id>
 HUGGINGFACE_EVAL_MODEL=<eval-model-id>
 
@@ -69,48 +63,68 @@ PINECONE_ENVIRONMENT=<environment>
 PINECONE_INDEX=<index-name>
 PINECONE_NAMESPACE=<namespace>
 
-# Optional: Google Generative AI (if you use the Google backend via LangChain)
+# Optional integration
 GOOGLE_GENAI_API_KEY=<google-genai-api-key>
 
-# Optional: local benchmarking / CSV export (used by `scripts/benchmark.py` and background logging in `chat_endpoint`)
-PATH=<absolute-folder-path-for-csv-logs>
+# Optional benchmark/export settings (current code reads these exact names)
+PATH=<csv-output-directory>
 FILENAME=<csv-filename>
 ```
 
-Use the same embedding model for ingestion and retrieval so query vectors match the index.
+`PATH` is read directly by code for CSV export constants; this can conflict with your system `PATH`. Treat this as current behavior, not best practice.
 
-## Run the API
+## Run locally
 
-From the **repository root** (so `api` and `core` resolve as packages):
+Run from the repository root:
 
 ```bash
 uvicorn api.server:server --reload --host 127.0.0.1 --port 8000
 ```
 
-The ASGI app instance is named `server` in `api/server.py`.
+The ASGI app variable is `server` in `api/server.py`.
+
+## API surface (intended)
+
+`api/routes/chatbot.py` defines:
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/v1/chat` | Body `{ "prompt": "<question>" }`; returns generated answer + sources. |
+| `GET` | `/v1/services/health` | Returns service health and initialization status. |
+
+Routes are mounted from `api/routes/chatbot.py` onto the app in `api/server.py` under the `/v1` prefix.
 
 ## Ingest documents
 
-`scripts/ingest_data.py` pulls the live Pinecone client via `get_resources()` at import time, which matches the object initialized in the API lifespan (`core.utils.startup.make_connections`). In practice you either need that initialization to have run first, or you should call `make_connections()` (async) before importing the ingest module, then invoke `ingest_in_batches` / `ingest_in_parallel` with your PDF path and display name.
+`scripts/ingest_data.py` accesses `get_resources()` at import time, so Pinecone resources must already be initialized before those functions run.
 
-From the repo root, imports use parent-package paths (`from ..core...`); run ingest logic as a module so `..` resolves to the project root:
+Module entry point:
 
 ```bash
 python -m scripts.ingest_data
 ```
 
-If the module exits immediately on import because `VECTOR_DB` is unset, initialize Pinecone the same way `api/server.py` does in `lifespan`, then run your ingestion calls (or add a small `__main__` block that awaits `make_connections()` before importing heavy logic).
+If ingestion fails with resource-initialization errors, initialize resources first using the same startup path used by the API lifespan (`make_connections` in `core/utils/startup.py`), then execute ingestion calls.
 
-## Tests
+## Tests and CI
+
+Run tests:
 
 ```bash
 pytest
 ```
 
-CI runs **Pylint** on Python 3.8–3.10 (`.github/workflows/pylint.yml`).
+CI linting is configured in `.github/workflows/pylint.yml` and currently runs Pylint on Python `3.10` through `3.14`.
 
-## Status and notes
+## Container and publishing
 
-- **Implemented:** RAG pipeline, chat and health routes, PDF chunking and embedding utilities, Pinecone-oriented ingestion and vector wrapper, structured logging and helpers (timeouts, timers).
-- **Thin / placeholder:** `scripts/benchmark.py`, `api/middleware/auth.py`, and several test files are minimal stubs.
-- **Operational detail:** Ensure your Pinecone index exists, dimensions match your embedding model, and namespaces used at ingest match those used in `RAGPipeline` / config before expecting useful chat results.
+- `Dockerfile` builds a multi-stage Python 3.11 image and runs Uvicorn on port `8501`.
+- `.github/workflows/package-image.yml` builds on push to `main` and publishes to GHCR and Docker Hub.
+- Docker entrypoint runs `uvicorn api.server:server ...` on port `8501`.
+
+## Current status
+
+- Core retrieval and generation flow is implemented.
+- Ingestion utilities are implemented (sequential and async upsert patterns).
+- Some components are placeholders or thin (`api/middleware/auth.py`, `scripts/benchmark.py`, `tests/test_api.py`).
+- Operational correctness depends on Pinecone index compatibility with your embedding model and namespace configuration consistency.

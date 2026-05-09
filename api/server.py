@@ -10,11 +10,11 @@ from tenacity import (
 
 
 from ..core.utils.startup import make_connections
-from .routes.chatbot import router
+from .routes.chatbot import chatbot
 
 # making resources available upon startup
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(_app: FastAPI):
     """initializes resources on startup"""
     # Initialize resources here
     await make_connections()
@@ -28,7 +28,7 @@ def create_app():
     """creates the client application and includes the routes"""
     app = FastAPI(lifespan=lifespan)
     # include API endpoints
-    app.include_router(router(), prefix="/v1")
+    app.include_router(chatbot, prefix="/v1")
     return app
 
 
@@ -36,4 +36,4 @@ def create_app():
 server = create_app()
 
 if __name__ == '__main__':
-    uvicorn.run('server:app', host='127.0.0.1', port=8000, reload=True)
+    uvicorn.run('api.server:server', host='127.0.0.1', port=8000, reload=True)

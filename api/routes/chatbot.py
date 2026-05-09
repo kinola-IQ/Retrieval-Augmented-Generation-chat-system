@@ -17,13 +17,7 @@ constants = benchmark_const()
 save_path = constants['path']
 filename = constants['filename']
 
-
-def router():
-    """serves router for bot related endpoints"""
-    return APIRouter()
-
-
-chatbot = router()
+chatbot = APIRouter()
 
 
 @timeout(30)

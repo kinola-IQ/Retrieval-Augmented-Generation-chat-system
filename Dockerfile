@@ -57,4 +57,4 @@ ENV PINECONE_NAMESPACE=chatbot
 ENV PINECONE_INDEX=Motocura
 
 
-CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8501", "--loop", "uvloop", "--workers", "1"]
+CMD ["uvicorn", "api.server:server", "--host", "0.0.0.0", "--port", "8501", "--loop", "uvloop", "--workers", "1"]
