@@ -1,10 +1,16 @@
 """Module for Misc utilities"""
+import os
 import time
 import threading
 from functools import wraps
+from pathlib import Path
+from typing import Sequence
+import pandas as pd
+
 
 # custom imports
 from .logger import logger
+
 
 
 # for timeout decorator
@@ -81,3 +87,61 @@ def returns(return_type):
             return result
         return wrapper
     return decorator
+
+
+# benchmark module utilities
+
+
+# save interaction data in csv
+
+INTERACTION_COLUMNS = [
+    "query",
+    "answer",
+    "reference"
+]
+
+EVALUATION_COLUMNS = [
+    "query",
+    "answer",
+    "reference",
+    "correctness_score"
+]
+
+
+def export_to_csv(
+    data: Sequence,
+    path: str,
+    save_name: str,
+    evaluation: bool = False
+) -> None:
+    """Append interaction/evaluation data to CSV."""
+
+    folder = Path(path)
+
+    if not folder.exists():
+        raise FileNotFoundError(
+            f"Directory does not exist: {folder}"
+        )
+
+    columns = (
+        EVALUATION_COLUMNS
+        if evaluation
+        else INTERACTION_COLUMNS
+    )
+
+    if len(data) != len(columns):
+        raise ValueError(
+            f"Expected {len(columns)} fields, got {len(data)}"
+        )
+
+    file_path = folder / f"{save_name}.csv"
+
+    pd.DataFrame(
+        [data],
+        columns=columns
+    ).to_csv(
+        file_path,
+        mode="a",
+        header=not file_path.exists(),
+        index=False
+    )

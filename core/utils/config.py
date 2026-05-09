@@ -35,3 +35,25 @@ def pinecone_config():
         'environment': environment,
         'namespace': namespace,
         'index': index}
+
+
+# google config
+def google_genai_config():
+    """serves configs for google genai"""
+    api_key = os.environ['GOOGLE_GENAI_API_KEY']
+
+    return {
+        'api key': api_key
+    }
+
+
+# benchmark constants
+def benchmark_const():
+    """serves values needed for benchmark module"""
+    path = os.environ['PATH']
+    filename = os.environ["FILENAME"]
+
+    return {
+        'path': path,
+        'filename': filename
+    }

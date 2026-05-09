@@ -1,0 +1,14 @@
+.env
+,gitignore
+.dvcignore
+README.md
+*.log
+*.yml
+
+# development and CI/CD files
+tests/
+scripts/
+Design plans/
+data/
+.github/
+.dvc/

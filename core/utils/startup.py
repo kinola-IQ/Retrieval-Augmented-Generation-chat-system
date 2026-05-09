@@ -21,8 +21,9 @@ CONFIGURED = False
 @retry(wait=wait_random_exponential(10, 40), stop=stop_after_attempt(5))
 async def make_connections():
     """initializes resources on startup"""
-    global VECTOR_DB, CONFIGURED
+    global VECTOR_DB, MODEL, CONFIGURED
     # Initialize resources here
+    # vector database
     if pinecone_api_key is None:
         raise ValueError(
             "Pinecone API key is not set in environment variables."

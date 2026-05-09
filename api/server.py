@@ -18,8 +18,8 @@ async def lifespan(app: FastAPI):
     """initializes resources on startup"""
     # Initialize resources here
     await make_connections()
-    yield app
-    # Clean up resources here
+    yield
+    
 
 
 # api client
