@@ -1,6 +1,6 @@
 # Retrieval-Augmented Generation (RAG) Chatbot
 
-A FastAPI backend that answers questions using **retrieval from a Pinecone vector index** and **local text generation** via Hugging Face [Transformers](https://huggingface.co/docs/transformers) pipelines. PDFs are chunked with LangChain (semantic or recursive splitting), embedded with Hugging Face embedding models, and upserted into Pinecone for similarity search at query time.
+A FastAPI backend that answers questions using **retrieval from a Pinecone vector index** and **local text generation** via Hugging Face [Transformers](https://huggingface.co/docs/transformers) pipelines. PDFs are chunked with LangChain (semantic or recursive splitting), embedded with Hugging Face embedding models, and upserted into Pinecone for similarity search at query time. The primary generation backend is the `HUGGINGFACE` pipeline; Google Generative AI can optionally be wired in via LangChain if you set the corresponding environment variables.
 
 ![RAG system design](Design%20plans/System%20Design.png)
 
@@ -47,7 +47,7 @@ Install from the repository root:
 pip install -r requirements.txt
 ```
 
-The code also imports the **Pinecone** Python client (`from pinecone import Pinecone`). If it is not pulled in transitively, install it explicitly (see [Pinecone Python SDK](https://docs.pinecone.io/guides/get-started/install)).
+The code also imports the **Pinecone** Python client (`from pinecone import Pinecone` in `core/retrieval/vectore_store.py`). If it is not pulled in transitively, install it explicitly (see [Pinecone Python SDK](https://docs.pinecone.io/guides/get-started/install)).
 
 Pinned / declared in `requirements.txt` include FastAPI, Uvicorn, Transformers, LangChain community + experimental, tiktoken, Pydantic, pytest, Ragas, LangSmith, tenacity, and python-dotenv. **PyTorch** (or another backend supported by your chosen models) is required at runtime for Transformers and embedding models.
 
@@ -68,6 +68,13 @@ PINECONE_API_KEY=<key>
 PINECONE_ENVIRONMENT=<environment>
 PINECONE_INDEX=<index-name>
 PINECONE_NAMESPACE=<namespace>
+
+# Optional: Google Generative AI (if you use the Google backend via LangChain)
+GOOGLE_GENAI_API_KEY=<google-genai-api-key>
+
+# Optional: local benchmarking / CSV export (used by `scripts/benchmark.py` and background logging in `chat_endpoint`)
+PATH=<absolute-folder-path-for-csv-logs>
+FILENAME=<csv-filename>
 ```
 
 Use the same embedding model for ingestion and retrieval so query vectors match the index.
