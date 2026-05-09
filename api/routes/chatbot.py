@@ -9,7 +9,7 @@ from ..middleware.schema import UserRequest, ChatResponse
 from ...core.generation.rag_pipeline import RAGPipeline
 from ...core.utils.helpers import timer, timeout, export_to_csv
 from ...core.utils.logger import logger
-from config import benchmark_const
+from ...core.utils.config import benchmark_const
 
 
 # configurations
@@ -26,6 +26,8 @@ async def chat_endpoint(
         user_request: UserRequest, background_tasks: BackgroundTasks):
     """endpoint to facilitate conversations"""
     try:
+        # we create an instance of the RAGPipeline
+        # then run the pipeline to generate an answer
         chat = RAGPipeline()
         response = await asyncio.to_thread(
             chat.generate_answer, user_request.prompt)
@@ -58,6 +60,9 @@ async def chat_endpoint(
 async def service_health():
     """gets initialization status of core resources"""
     try:
+        # we wait for the connection to be successful
+        # this is a blocking operation
+        # so we use asyncio.wait_for to timeout after 10 seconds
         status = await asyncio.wait_for(
             connection_success(), timeout=10)
         if status is False:

@@ -1,5 +1,4 @@
 """Script to preprocess & index documents"""
-
 import itertools
 import uuid
 from typing import Iterable
@@ -82,6 +81,7 @@ def ingest_in_batches(
         )
     logger.info("data ingestion by sequential batching initiated")
     try:
+        # we process the data in chunks
         for batch, counter in chunks(file, batch_size):
             vectors = _prepare_batch_records(batch, file_name)
             vector_db_client.upsert(
@@ -112,9 +112,17 @@ def ingest_in_parallel(
             index_name, pool_threads=thread_value
             ) as index:
         try:
+            # we store the results of the asynchronous requests
             async_results = []
+            # we process the data in chunks
             for batch, counter in chunks(file, batch_size):
+                # we generate the embeddings and neccesary metadata for the batch
+                # before submitting the request to the vector database
+                # this makes it easy to access the data later
                 vectors = _prepare_batch_records(batch, file_name)
+                # we submit the request to the vector database asynchronously
+                # this allows us to process the next batch while waiting for the current batch to be processed
+                # this is more efficient than submitting the requests sequentially
                 async_results.append(
                     index.upsert(
                         vectors=vectors,
