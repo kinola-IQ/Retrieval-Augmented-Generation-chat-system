@@ -29,7 +29,7 @@ index_name = pinecone_configuration['index'].lower()
 def chunks(file, batch_size: int = 100) -> Iterable[tuple]:
     """serves data on demand streams to conserve memory usage"""
     # making the doc an iterable
-    doc = load_and_split_document(file)
+    doc = load_and_split_document(file_path=file)
     iterable = iter(doc)
 
     # we are slicing the document into batches
@@ -47,7 +47,8 @@ def chunks(file, batch_size: int = 100) -> Iterable[tuple]:
 def _prepare_batch_records(batch, file_name):
     """prepares records for upload to vector database"""
     # generate embeddings to be used in similarity search
-    embeddings = create_embeddings(batch)
+    texts = [doc.page_content for doc in batch]
+    embeddings = create_embeddings(texts)
 
     # checking that embedding function works properly
     # and does not return empty or wrong length results
@@ -58,7 +59,7 @@ def _prepare_batch_records(batch, file_name):
     ids = [f"{batch_id}-{i}" for i in range(len(embeddings))]
 
     # metadata to used used to sort information
-    metadatas = [{'source': file_name, 'text': text} for text in batch]
+    metadatas = [{'source': file_name, 'text': text.page_content} for text in batch]
 
     # data to be stored on the vector database
     vectors = [
@@ -86,7 +87,6 @@ def ingest_in_batches(
             vectors = _prepare_batch_records(batch, file_name)
             vector_db_client.upsert(
                 vectors=vectors,
-                index_name=index_name,
                 namespace=namespace)
             logger.info("batch %s complete", counter)
         logger.info("data ingestion by sequential batching complete")
@@ -128,7 +128,6 @@ def ingest_in_parallel(
                     index.upsert(
                         vectors=vectors,
                         namespace=namespace,
-                        index_name=index_name,
                         async_req=True,
                     )
                 )

@@ -28,7 +28,7 @@ def semantic_split(
     """splits documents by semantic meaning"""
     # Initialize the SemanticChunker
     text_splitter = SemanticChunker(
-        embeddings=model,
+        embeddings=HuggingFaceEmbeddings(model_name=model),
         breakpoint_threshold_type=breakpoint_threshold_type,
         breakpoint_threshold_amount=breakpoint_threshold_amount
         )
@@ -80,9 +80,7 @@ def load_and_split_document(
         chunks = doc_splitter.split_documents(documents)
         return chunks
     except Exception as err:
-        raise ValueError(
-                f"Invalid split type: {split_type}. \
-                    Must be 'semantic_split' or 'recursive_split'.") from err
+        raise Exception(f'{err}: could not split file') from err
 
 
 # query splitter functions
