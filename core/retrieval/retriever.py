@@ -2,17 +2,19 @@
 
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from ..utils.startup import get_resources
+from ..utils import startup
 from ..utils.logger import logger
 from ..utils.helpers import timer, returns
 from ..utils.config import huggingface_config
 
 
 # load resources needed for retrieval
-resources = get_resources()
+# resources = get_resources()
 
 # vector_db is needed for retrieval,
 # so we make it available at the module level
-vector_db = resources["vector_db"]
+# vector_db = resources["vector_db"]
+vector_db = startup.VECTOR_DB
 
 # Initialize embedding model for query embedding
 _embedding_config = huggingface_config()

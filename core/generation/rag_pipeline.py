@@ -20,7 +20,7 @@ class RAGPipeline:
 
     @timer
     def generate_answer(
-            self, query: str, namespace: str = RAGPipeline().NAMESPACE,
+            self, query: str, namespace: str = NAMESPACE,
             top_k: int = 5) -> Dict[str, Any]:
         """Generate an answer using retrieval-augmented generation.
 
@@ -38,7 +38,9 @@ class RAGPipeline:
 
             # Step 2: Build prompt with context
             context_text = self._build_context(retrieved_docs)
-            prompt = self._build_prompt(query, context_text)
+            prompt = self._build_prompt(
+                # query,
+                context_text)
 
             # Step 3: Generate answer
             answer = self._generate_response(prompt)
@@ -69,14 +71,13 @@ class RAGPipeline:
 
         return "\n\n".join(context_parts)
 
-    def _build_prompt(self, query: str, context: str) -> str:
+    def _build_prompt(self,  # query: str,
+                       context: str) -> str:
         """Build the prompt for the generator."""
-        prompt = f"""Based on the following context, answer the question accurately. If the context doesn't contain enough information, say so.
+        prompt = f"""Based on the following context, the answer is
 
 Context:
 {context}
-
-Question: {query}
 
 Answer:"""
         return prompt

@@ -8,9 +8,9 @@ from tenacity import (
     wait_random_exponential,
     stop_after_attempt)
 
-
-from ..core.utils.startup import make_connections
+from core.utils.startup import make_connections
 from .routes.chatbot import chatbot
+
 
 # making resources available upon startup
 @asynccontextmanager
@@ -19,7 +19,7 @@ async def lifespan(_app: FastAPI):
     # Initialize resources here
     await make_connections()
     yield
-    
+
 
 
 # api client
@@ -36,4 +36,4 @@ def create_app():
 server = create_app()
 
 if __name__ == '__main__':
-    uvicorn.run('api.server:server', host='127.0.0.1', port=8000, reload=True)
+    uvicorn.run('api.server:server', host='127.0.0.1', port=8080, reload=True)

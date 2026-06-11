@@ -1,27 +1,27 @@
 """Script to preprocess & index documents"""
 import itertools
 import uuid
-from typing import Iterable
-
+from typing import Iterable, Literal
+from pinecone import Pinecone
 
 # custom modules
-from ..core.utils.config import pinecone_config
-from ..core.utils.startup import get_resources
-from ..core.retrieval.embeddings import (
+from core.utils.config import pinecone_config
+from core.retrieval.embeddings import (
     load_and_split_document, create_embeddings)
-from ..core.utils.logger import logger
-from ..core.utils.helpers import timer, timeout
-from ..core.utils.exceptions import BatchingError
+from core.utils.logger import logger
+from core.utils.helpers import timer, timeout
+from core.utils.exceptions import BatchingError
 
 # load resources needed for retrieval
-resources = get_resources()
 pinecone_configuration = pinecone_config()
 
 # vector_db is needed for injesting,
 # so we make it available at the module level
-vector_db_client = resources["vector_db"]
-namespace = pinecone_configuration["namespace"]
-index_name = pinecone_configuration['index']
+pinecone_api_key = pinecone_configuration['api key']
+vector_db_client = Pinecone(api_key=pinecone_api_key, pool_threads=30)
+
+namespace = pinecone_configuration["namespace"].lower()
+index_name = pinecone_configuration['index'].lower()
 
 
 # turning vectors to iterables to reduce memory cost
@@ -71,7 +71,7 @@ def _prepare_batch_records(batch, file_name):
 # batch injestion
 @timeout(180)
 def ingest_in_batches(
-        file=None, file_name=None, batch_size: int = 100):
+        file=None, file_name: str='motocura chat docs', batch_size: int = 100):
     """injests vectors in batches to reduce memory usage"""
     # checks
     if file is None or file_name is None:
@@ -86,6 +86,7 @@ def ingest_in_batches(
             vectors = _prepare_batch_records(batch, file_name)
             vector_db_client.upsert(
                 vectors=vectors,
+                index_name=index_name,
                 namespace=namespace)
             logger.info("batch %s complete", counter)
         logger.info("data ingestion by sequential batching complete")
@@ -99,7 +100,7 @@ def ingest_in_batches(
 # parallel ingesting
 @timeout(120)
 def ingest_in_parallel(
-        file, file_name, thread_value: int = 30, batch_size: int = 100):
+        file, file_name:str='motocura chat docs', thread_value: int = 30, batch_size: int = 100):
     """Submits upsert requests asynchronously for each chunk"""
     # checks
     if file is None or file_name is None:
@@ -148,3 +149,15 @@ def ingest_in_parallel(
             logger.error("ValueError occured, stopping the ingestion")
             raise ValueError(
                 f"{err}: wrong input caused the failed ingestion") from err
+
+
+@timer
+def ingest_data(file: str, strategy: Literal['parallel', 'batch'] = 'parallel'):
+    if strategy == 'parallel':
+        ingest_in_parallel(file)
+    elif strategy == 'batch':
+        ingest_in_batches(file)
+
+
+if __name__ == '__main__':
+    ingest_data(file= r'data\raw\motocura AI chat box[1].pdf', strategy="parallel")

@@ -82,3 +82,8 @@ class VectorStore:
 def get_vector_store(pinecone_client: Optional[Pinecone] = None) -> VectorStore:
     """Factory function to create VectorStore instance."""
     return VectorStore(pinecone_client)
+
+
+if __name__ == "__main__":
+    store = get_vector_store()
+    

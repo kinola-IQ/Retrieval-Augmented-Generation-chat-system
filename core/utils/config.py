@@ -26,13 +26,15 @@ def huggingface_config():
 # pinecone config
 def pinecone_config():
     """serves configs for pinecone vector database"""
-    api_key = os.environ["PINECONE_API_KEY"]
-    environment = os.environ["PINECONE_ENVIRONMENT"]
-    namespace = os.environ["PINECONE_NAMESPACE"]
-    index = os.environ['PINECONE_INDEX']
+    api_key = os.environ.get("PINECONE_API_KEY")
+    region = os.environ.get("PINECONE_REGION")
+    cloud = os.environ.get("PINECONE_CLOUD_PROVIDER")
+    namespace = os.environ.get("PINECONE_NAMESPACE")
+    index = os.environ.get('PINECONE_INDEX')
     return {
         'api key': api_key,
-        'environment': environment,
+        'region': region,
+        'cloud': cloud,
         'namespace': namespace,
         'index': index}
 

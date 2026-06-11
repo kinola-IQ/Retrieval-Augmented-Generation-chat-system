@@ -4,12 +4,12 @@ from fastapi import HTTPException, APIRouter, BackgroundTasks
 from pathlib import Path
 
 # custom modules
-from ...core.utils.startup import connection_success
+from core.utils.startup import connection_success
 from ..middleware.schema import UserRequest, ChatResponse
-from ...core.generation.rag_pipeline import RAGPipeline
-from ...core.utils.helpers import timer, timeout, export_to_csv
-from ...core.utils.logger import logger
-from ...core.utils.config import benchmark_const
+from core.generation.rag_pipeline import RAGPipeline
+from core.utils.helpers import timer, timeout, export_to_csv
+from core.utils.logger import logger
+from core.utils.config import benchmark_const
 
 
 # configurations

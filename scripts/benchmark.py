@@ -7,9 +7,9 @@ from openevals.prompts import CORRECTNESS_PROMPT
 from langchain_google_genai import ChatGoogleGenerativeAI
 from tenacity import retry, wait_random_exponential, stop_after_attempt
 
-from ..core.utils.config import benchmark_const, google_genai_config
-from ..core.utils.helpers import timeout, export_to_csv
-from ..core.utils.logger import logger
+from core.utils.config import benchmark_const, google_genai_config
+from core.utils.helpers import timeout, export_to_csv
+from core.utils.logger import logger
 
 # load required variables
 CONSTANTS = benchmark_const()

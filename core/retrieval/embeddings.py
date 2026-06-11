@@ -1,10 +1,11 @@
 """Handles Embedding generation"""
-from typing import List, Document, tuple
+from typing import List
+from pathlib import Path
 import tiktoken
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_experimental.text_splitter import SemanticChunker
-from langchain.text_splitter import (
+from langchain_text_splitters import (
     RecursiveCharacterTextSplitter, CharacterTextSplitter, TokenTextSplitter)
 
 # custom modules
@@ -59,7 +60,7 @@ def load_and_split_document(
     """Loads a PDF document, splits it into chunks, \
         and generates embeddings for each chunk."""
     # Validate file type
-    if not file_path.lower().endswith(".pdf"):
+    if not  Path(file_path).suffix.lower() == ".pdf":
         raise ValueError(f"Invalid file type: {file_path}.\
                           Only PDF files are supported.")
 
@@ -139,7 +140,7 @@ def load_and_split_query(query: str, split_type: str = 'character_split'):
 @timer
 @returns(list)
 def create_embeddings(
-        chunks: tuple[Document],
+        chunks: str,
         model: str = embedding_model):
     """creates embeddings from either queries or documents"""
     try:
