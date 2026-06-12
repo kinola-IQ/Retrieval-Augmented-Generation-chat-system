@@ -138,7 +138,7 @@ def load_and_split_query(query: str, split_type: str = 'character_split'):
 @timer
 @returns(list)
 def create_embeddings(
-        chunks: str,
+        chunks: List[str],
         model: str = embedding_model):
     """creates embeddings from either queries or documents"""
     try:

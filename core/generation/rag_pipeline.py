@@ -19,7 +19,7 @@ class RAGPipeline:
         self.generator.load_model()
 
     @timer
-    def generate_answer(
+    async def generate_answer(
             self, query: str, namespace: str = NAMESPACE,
             top_k: int = 5) -> Dict[str, Any]:
         """Generate an answer using retrieval-augmented generation.
@@ -74,12 +74,11 @@ class RAGPipeline:
     def _build_prompt(self,  # query: str,
                        context: str) -> str:
         """Build the prompt for the generator."""
-        prompt = f"""Based on the following context, the answer is
+        prompt = f"""
+        Documents:
+        {context}
 
-Context:
-{context}
-
-Answer:"""
+        for more information visit info@motocura.com"""
         return prompt
 
     def _generate_response(self, prompt: str) -> str:
@@ -93,7 +92,7 @@ Answer:"""
             # Most text-generation tasks support these common parameters
             outputs = self.generator.pipeline(
                 prompt,
-                max_length=512,
+                max_length=45,
                 do_sample=True,
                 temperature=0.7
             )
@@ -102,7 +101,7 @@ Answer:"""
             if isinstance(outputs, list) and len(outputs) > 0:
                 if isinstance(outputs[0], dict):
                     # Standard format: [{'generated_text': '...'}]
-                    return outputs[0].get('generated_text', str(outputs)).strip()
+                    return outputs[0].get('summary_text', str(outputs)).strip()
                 else:
                     # Fallback for other formats
                     return str(outputs[0]).strip()

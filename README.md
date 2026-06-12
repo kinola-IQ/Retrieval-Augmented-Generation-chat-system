@@ -83,6 +83,18 @@ uvicorn api.server:server --reload --host 127.0.0.1 --port 8000
 
 The ASGI app variable is `server` in `api/server.py`.
 
+## Streamlit UI
+
+A consumer-facing UI is available in `streamlit_app.py`.
+Install the new UI dependency and run:
+
+```bash
+pip install -r requirements.txt
+streamlit run streamlit_app.py --server.port 8502
+```
+
+Then open the browser at the Streamlit URL and point the app to the backend API URL, for example `http://127.0.0.1:8000/v1`.
+
 ## API surface
 
 `api/routes/chatbot.py` defines:

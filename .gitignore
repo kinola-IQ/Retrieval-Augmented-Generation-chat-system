@@ -1,3 +1,5 @@
 /.env
 /motocura,AI chat box[1].pdf
 /*.log*
+/experimental.py
+

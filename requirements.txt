@@ -1,6 +1,6 @@
 fastapi
 uvicorn
-transformers
+transformers<5.0.0
 sentence-transformers
 tenacity
 python-dotenv
@@ -17,3 +17,5 @@ langsmith
 ipykernel
 openevals
 pinecone
+requests
+streamlit

@@ -2,13 +2,14 @@
 import os
 import time
 import threading
-from functools import wraps
 from pathlib import Path
+from functools import wraps
 from typing import Sequence
 import pandas as pd
 
 
 # custom imports
+from core.utils.constants import home_path
 from .logger import logger
 
 
@@ -108,17 +109,16 @@ EVALUATION_COLUMNS = [
 ]
 
 
-def export_to_csv(
+async def export_to_csv(
     data: Sequence,
-    path: str,
-    save_name: str,
+    save_name: str = 'interaction_data',
     evaluation: bool = False
 ) -> None:
     """Append interaction/evaluation data to CSV."""
 
-    folder = Path(path)
+    folder = home_path() / "data" / "raw"
 
-    if not folder.exists():
+    if not Path(folder).exists():
         raise FileNotFoundError(
             f"Directory does not exist: {folder}"
         )

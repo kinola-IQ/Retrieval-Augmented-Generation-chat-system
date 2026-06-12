@@ -33,7 +33,7 @@ class HUGGINGFACE(ModelProvider):
         self.task = cfg['task']
         self.pipeline = None
 
-    @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(5))
+    @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(2))
     def _create_pipeline(self):
         """Internal helper that actually constructs the transformers pipeline."""
         return pipeline(self.task, model=self.model_name)

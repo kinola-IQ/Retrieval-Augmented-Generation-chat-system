@@ -1,20 +1,11 @@
 """Logic for retrieving relevant docs"""
 
 from langchain_community.embeddings import HuggingFaceEmbeddings
-from ..utils.startup import get_resources
 from ..utils import startup
 from ..utils.logger import logger
 from ..utils.helpers import timer, returns
-from ..utils.config import huggingface_config
+from ..utils.config import huggingface_config, pinecone_config
 
-
-# load resources needed for retrieval
-# resources = get_resources()
-
-# vector_db is needed for retrieval,
-# so we make it available at the module level
-# vector_db = resources["vector_db"]
-vector_db = startup.VECTOR_DB
 
 # Initialize embedding model for query embedding
 _embedding_config = huggingface_config()
@@ -23,13 +14,19 @@ _embedding_model = HuggingFaceEmbeddings(
                                       'sentence-transformers/all-MiniLM-L6-v2')
 )
 
+# establishing function gate
+vector_db = None
 
 # retrieves context to make the response knowledgable
 @timer  # to keep track of time taken for retrieval
 @returns(list)  # we expect a list of relevant documents to be returned
-def retrieve_context(query: str, namespace: str = 'None', top_k: int = 5):
+def retrieve_context(query: str, namespace: str = 'None', top_k: int = 7):
     """retrieves relevant context for a given query"""
+    global vector_db
     # perform retrieval using the vector database
+    if vector_db is None:
+        vector_db = startup.get_resources()["vector_db"]
+        index = vector_db.Index(pinecone_config()['index'].lower())
     if namespace == 'None':
         logger.warning(
             "No namespace provided for retrieval. Using default namespace."
@@ -45,12 +42,13 @@ def retrieve_context(query: str, namespace: str = 'None', top_k: int = 5):
 
     # Step 2: Query the vector store with the embedding
     try:
-        results = vector_db.query(
+        results = index.query(
             vector=query_embedding,
             top_k=top_k,
             include_metadata=True,
             namespace=namespace)
-        return results
+        
+        return results['matches']
     except Exception as e:
         logger.error("Vector DB query failed: %s", e)
         raise

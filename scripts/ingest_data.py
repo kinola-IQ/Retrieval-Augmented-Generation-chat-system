@@ -20,8 +20,11 @@ pinecone_configuration = pinecone_config()
 pinecone_api_key = pinecone_configuration['api key']
 vector_db_client = Pinecone(api_key=pinecone_api_key, pool_threads=30)
 
+
 namespace = pinecone_configuration["namespace"].lower()
 index_name = pinecone_configuration['index'].lower()
+
+
 
 
 # turning vectors to iterables to reduce memory cost
@@ -82,10 +85,12 @@ def ingest_in_batches(
         )
     logger.info("data ingestion by sequential batching initiated")
     try:
+        # we need to connect to the storage index
+        index = vector_db_client.Index(index_name)
         # we process the data in chunks
         for batch, counter in chunks(file, batch_size):
             vectors = _prepare_batch_records(batch, file_name)
-            vector_db_client.upsert(
+            index.upsert(
                 vectors=vectors,
                 namespace=namespace)
             logger.info("batch %s complete", counter)
@@ -100,7 +105,7 @@ def ingest_in_batches(
 # parallel ingesting
 @timeout(120)
 def ingest_in_parallel(
-        file, file_name:str='motocura chat docs', thread_value: int = 30, batch_size: int = 100):
+        file, file_name: str='motocura chat docs', thread_value: int = 30, batch_size: int = 100):
     """Submits upsert requests asynchronously for each chunk"""
     # checks
     if file is None or file_name is None:
@@ -150,6 +155,7 @@ def ingest_in_parallel(
                 f"{err}: wrong input caused the failed ingestion") from err
 
 
+# factory function to switch methods
 @timer
 def ingest_data(file: str, strategy: Literal['parallel', 'batch'] = 'parallel'):
     if strategy == 'parallel':

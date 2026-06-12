@@ -36,4 +36,9 @@ def create_app():
 server = create_app()
 
 if __name__ == '__main__':
-    uvicorn.run('api.server:server', host='127.0.0.1', port=8080, reload=True)
+    import os
+    from dotenv import load_dotenv
+    # api configuration
+    host = os.environ.get("HOST","0.0.0.0")
+    port = os.environ.get("PORT",8000)
+    uvicorn.run('api.server:server', host=host, port=port, reload=True)

@@ -9,19 +9,21 @@ from tenacity import (
 # custom modules
 from .helpers import timer
 from .config import pinecone_config
+from ..generation.rag_pipeline import RAGPipeline
 
 # configuration
 pinecone_api_key = pinecone_config()['api key']
 # database which holds all the answers
 VECTOR_DB = None
 CONFIGURED = False
+BOT = None
 
 
 @timer
 @retry(wait=wait_random_exponential(10, 40), stop=stop_after_attempt(5))
 async def make_connections():
     """initializes resources on startup"""
-    global VECTOR_DB, CONFIGURED
+    global VECTOR_DB, CONFIGURED, BOT
     # Initialize resources here
     # vector database
     if pinecone_api_key is None:
@@ -29,6 +31,9 @@ async def make_connections():
             "Pinecone API key is not set in environment variables."
             )
     VECTOR_DB = Pinecone(api_key=pinecone_api_key, pool_threads=30)
+
+    # rag pipeline
+    BOT = RAGPipeline()
 
     # status to inform us of successful connection on all parts
     CONFIGURED = True
@@ -46,7 +51,7 @@ def get_resources():
     return {"vector_db": VECTOR_DB}
 
 
-def connection_success():
+async def connection_success():
     """informs us of successful connection of all resources"""
     if CONFIGURED is False:
         raise ValueError(
