@@ -4,7 +4,6 @@ from dotenv import load_dotenv
 # import json
 import requests
 import streamlit as st
-from streamlit_autorefresh import st_autorefresh
 from scripts.backend_startup import start_backend
 load_dotenv()
 
@@ -144,5 +143,3 @@ def render_app() -> None:
 if __name__ == "__main__":
     if start_backend():
         render_app()
-    else:
-        st_autorefresh()
