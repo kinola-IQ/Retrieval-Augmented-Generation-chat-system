@@ -10,11 +10,11 @@ load_dotenv()
 # Hugging face config
 def huggingface_config():
     """serves configs for huggingface"""
-    api_key = os.environ["HUGGINGFACE_API_KEY"]
-    model_name = os.environ['HUGGINGFACE_MODEL_NAME']
-    task = os.environ['HUGGINGFACE_TASK']
-    embedding_model = os.environ['HUGGINGFACE_EMBEDDING_MODEL']
-    eval_model = os.environ['HUGGINGFACE_EVAL_MODEL']
+    api_key = os.environ.get("HUGGINGFACE_API_KEY", '')
+    model_name = os.environ.get('HUGGINGFACE_MODEL_NAME','')
+    task = os.environ.get('HUGGINGFACE_TASK','')
+    embedding_model = os.environ.get('HUGGINGFACE_EMBEDDING_MODEL','')
+    eval_model = os.environ.get('HUGGINGFACE_EVAL_MODEL','')
     return {
         'api key': api_key,
         'model': model_name,
@@ -26,11 +26,11 @@ def huggingface_config():
 # pinecone config
 def pinecone_config():
     """serves configs for pinecone vector database"""
-    api_key = os.environ.get("PINECONE_API_KEY")
-    region = os.environ.get("PINECONE_REGION")
-    cloud = os.environ.get("PINECONE_CLOUD_PROVIDER")
-    namespace = os.environ.get("PINECONE_NAMESPACE")
-    index = os.environ.get('PINECONE_INDEX')
+    api_key = os.environ.get("PINECONE_API_KEY","")
+    region = os.environ.get("PINECONE_REGION","")
+    cloud = os.environ.get("PINECONE_CLOUD_PROVIDER","")
+    namespace = os.environ.get("PINECONE_NAMESPACE","")
+    index = os.environ.get('PINECONE_INDEX','')
     return {
         'api key': api_key,
         'region': region,
@@ -42,7 +42,7 @@ def pinecone_config():
 # google config
 def google_genai_config():
     """serves configs for google genai"""
-    api_key = os.environ['GOOGLE_GENAI_API_KEY']
+    api_key = os.environ.get('GOOGLE_GENAI_API_KEY','')
 
     return {
         'api key': api_key
@@ -52,8 +52,8 @@ def google_genai_config():
 # benchmark constants
 def benchmark_const():
     """serves values needed for benchmark module"""
-    path = os.environ['PATH']
-    filename = os.environ["FILENAME"]
+    path = os.environ.get('PATH','')
+    filename = os.environ.get("FILENAME","")
 
     return {
         'path': path,
