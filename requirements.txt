@@ -6,7 +6,7 @@ tenacity
 python-dotenv
 langchain
 langchain-core
-langchain-community
+langchain-community==0.4.2
 langchain-experimental
 langchain_google_genai
 tiktoken
