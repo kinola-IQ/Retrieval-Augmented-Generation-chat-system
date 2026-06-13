@@ -71,7 +71,7 @@ def render_sidebar() -> dict:
 
 
 def render_app() -> None:
-    st.title("RAG PDF Assistant")
+    st.title("Motocura Chat Assistant")
     st.markdown(
         "Ask questions about the ingested PDF knowledge base and receive grounded answers "
         "with source citations. This interface connects to the existing FastAPI backend."
