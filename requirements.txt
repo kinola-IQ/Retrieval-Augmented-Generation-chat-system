@@ -7,6 +7,7 @@ python-dotenv
 langchain
 langchain-core
 # langchain-community==0.4.2
+langchain_huggingface
 langchain-experimental
 langchain_google_genai
 tiktoken
