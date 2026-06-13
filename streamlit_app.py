@@ -1,22 +1,26 @@
+import uvicorn
 import os
 from dotenv import load_dotenv
-import json
+# import json
 import requests
 import streamlit as st
-
+from streamlit_autorefresh import st_autorefresh
+from scripts.backend_startup import start_backend
 load_dotenv()
 
 
 st.set_page_config(
-    page_title="RAG PDF Assistant",
+    page_title="Morocura Chat Assistant",
     page_icon="🤖",
     layout="wide",
 )
+
 
 # api configuration
 host = os.environ.get("HOST","0.0.0.0")
 port = os.environ.get("PORT",8000)
 DEFAULT_BACKEND_URL = f"http://{host}:{port}/v1"
+
 
 @st.cache_data(ttl=30)
 def check_backend_health(api_url: str) -> dict:
@@ -25,7 +29,7 @@ def check_backend_health(api_url: str) -> dict:
         "message": "Backend not available yet.",
     }
     try:
-        response = requests.get(f"{api_url}/services/health", timeout=5)
+        response = requests.get(f"{api_url}/services/health", timeout=90)
         if response.ok:
             payload = response.json()
             status = {
@@ -138,4 +142,7 @@ def render_app() -> None:
 
 
 if __name__ == "__main__":
-    render_app()
+    if start_backend():
+        render_app()
+    else:
+        st_autorefresh()
