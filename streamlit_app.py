@@ -4,9 +4,12 @@ from dotenv import load_dotenv
 # import json
 import requests
 import streamlit as st
-from scripts.backend_startup import start_backend
+from streamlit_autorefresh import st_autorefresh
+from scripts import backend_startup
 load_dotenv()
 
+# start backend
+backend_startup.start_backend()
 
 st.set_page_config(
     page_title="Morocura Chat Assistant",
@@ -89,57 +92,58 @@ def render_app() -> None:
     if "history" not in st.session_state:
         st.session_state.history = []
 
-    prompt = st.text_area(
-        "Ask a question",
-        placeholder="What can you tell me about the documents in the knowledge base?",
-        height=180,
-    )
+    if backend_startup.BACKEND is True:
+        prompt = st.text_area(
+            "Ask a question",
+            placeholder="What can you tell me about the documents in the knowledge base?",
+            height=180,
+        )
 
-    submit_button = st.button("Send question")
+        submit_button = st.button("Send question")
 
-    if submit_button and prompt:
-        with st.spinner("Querying backend..."):
-            try:
-                response = post_question(api_url, prompt)
-                answer = response.get("response", "No answer returned.")
-                sources = response.get("sources", [])
-                entry = {
-                    "prompt": prompt,
-                    "response": answer,
-                    "sources": sources,
-                }
-                st.markdown(f"**Response:**\n{answer}")
-                st.session_state.history.insert(0, entry)
-            except requests.exceptions.RequestException as exc:
-                st.error(f"Request failed: {exc}")
-            except ValueError as exc:
-                st.error(f"Unexpected response: {exc}")
+        if submit_button and prompt:
+            with st.spinner("Querying backend..."):
+                try:
+                    response = post_question(api_url, prompt)
+                    answer = response.get("response", "No answer returned.")
+                    sources = response.get("sources", [])
+                    entry = {
+                        "prompt": prompt,
+                        "response": answer,
+                        "sources": sources,
+                    }
+                    st.markdown(f"**Response:**\n{answer}")
+                    st.session_state.history.insert(0, entry)
+                except requests.exceptions.RequestException as exc:
+                    st.error(f"Request failed: {exc}")
+                except ValueError as exc:
+                    st.error(f"Unexpected response: {exc}")
 
-    if st.session_state.history:
+        if st.session_state.history:
+            st.markdown("---")
+            st.header("Conversation history")
+            for idx, entry in enumerate(st.session_state.history, 1):
+                st.subheader(f"Question {idx}")
+                st.markdown(f"**You asked:** {entry['prompt']}")
+                st.markdown(f"**Answer:** {entry['response']}")
+                if entry["sources"]:
+                    with st.expander("View retrieved sources"):
+                        for source in entry["sources"]:
+                            source_text = source.get('text', '')
+                            truncated_text = source_text[:300] + ('...' if len(source_text) > 300 else '')
+                            st.markdown(
+                                f"- **Source:** {source.get('source', 'unknown')}  \n"
+                                f"**Score:** {source.get('score', 'N/A')}  \n"
+                                f"**Text:** {truncated_text}"
+                            )
+
         st.markdown("---")
-        st.header("Conversation history")
-        for idx, entry in enumerate(st.session_state.history, 1):
-            st.subheader(f"Question {idx}")
-            st.markdown(f"**You asked:** {entry['prompt']}")
-            st.markdown(f"**Answer:** {entry['response']}")
-            if entry["sources"]:
-                with st.expander("View retrieved sources"):
-                    for source in entry["sources"]:
-                        source_text = source.get('text', '')
-                        truncated_text = source_text[:300] + ('...' if len(source_text) > 300 else '')
-                        st.markdown(
-                            f"- **Source:** {source.get('source', 'unknown')}  \n"
-                            f"**Score:** {source.get('score', 'N/A')}  \n"
-                            f"**Text:** {truncated_text}"
-                        )
-
-    st.markdown("---")
-    st.info(
-        "This UI is designed to support the project’s PDF-based Retrieval-Augmented Generation flow: "
-        "users submit a natural-language query, the backend retrieves relevant PDF context, and a Hugging Face model generates an answer." 
-    )
-
+        st.info(
+            "This UI is designed to support the project’s PDF-based Retrieval-Augmented Generation flow: "
+            "users submit a natural-language query, the backend retrieves relevant PDF context, and a Hugging Face model generates an answer." 
+        )
+    else:
+        st_autorefresh(interval=1000, limit=2)
 
 if __name__ == "__main__":
-    if start_backend():
-        render_app()
+    render_app()

@@ -13,7 +13,7 @@ load_dotenv()
 host = os.environ.get("HOST","0.0.0.0")
 port = os.environ.get("PORT", 8000)
 
-
+BACKEND = True
 # backend startup
 def port_in_use(host, port):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -34,6 +34,7 @@ def run_backend():
 
 @st.cache_resource
 def start_backend():
+    global BACKEND
      # we need the server up and running
      # for requests to go through to the backend
     if not port_in_use(host, port):
@@ -41,5 +42,6 @@ def start_backend():
             target=run_backend,
             daemon=True
         ).start()
-        return True
+        BACKEND = True
+    
     
