@@ -3,7 +3,8 @@ from typing import List
 from pathlib import Path
 import tiktoken
 from langchain_community.document_loaders import PyPDFLoader
-from langchain_community.embeddings import HuggingFaceEmbeddings
+# from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_experimental.text_splitter import SemanticChunker
 from langchain_text_splitters import (
     RecursiveCharacterTextSplitter, CharacterTextSplitter, TokenTextSplitter)

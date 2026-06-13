@@ -1,6 +1,7 @@
 """Logic for retrieving relevant docs"""
 
-from langchain_community.embeddings import HuggingFaceEmbeddings
+# from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 from ..utils import startup
 from ..utils.logger import logger
 from ..utils.helpers import timer, returns
