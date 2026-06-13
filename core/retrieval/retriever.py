@@ -12,7 +12,7 @@ from ..utils.config import huggingface_config, pinecone_config
 _embedding_config = huggingface_config()
 _embedding_model = HuggingFaceEmbeddings(
     model_name=_embedding_config.get('embedding model',
-                                      'sentence-transformers/all-MiniLM-L6-v2')
+                                      'sentence-transformers/all-mpnet-base-v2')
 )
 
 # establishing function gate
