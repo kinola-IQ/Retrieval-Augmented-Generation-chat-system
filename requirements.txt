@@ -19,3 +19,4 @@ openevals
 pinecone
 requests
 streamlit
+streamlit_autorefresh
