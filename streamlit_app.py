@@ -8,8 +8,6 @@ from streamlit_autorefresh import st_autorefresh
 from scripts import backend_startup
 load_dotenv()
 
-# start backend
-backend_startup.start_backend()
 
 st.set_page_config(
     page_title="Morocura Chat Assistant",
@@ -17,6 +15,10 @@ st.set_page_config(
     layout="wide",
 )
 
+# Start backend once, not on every rerun
+if "backend_started" not in st.session_state:
+    backend_startup.start_backend()
+    st.session_state.backend_started = True
 
 # api configuration
 host = os.environ.get("HOST","0.0.0.0")
@@ -71,7 +73,7 @@ def render_sidebar() -> dict:
 
 
 def render_app() -> None:
-    st.title("Motocura Chat Assistant")
+    st.title("RAG PDF Assistant")
     st.markdown(
         "Ask questions about the ingested PDF knowledge base and receive grounded answers "
         "with source citations. This interface connects to the existing FastAPI backend."
@@ -88,62 +90,61 @@ def render_app() -> None:
                 st.json(health["details"])
     else:
         st.warning(health["message"])
+        st_autorefresh(interval=2000, limit=None)
 
     if "history" not in st.session_state:
         st.session_state.history = []
 
-    if backend_startup.BACKEND is True:
-        prompt = st.text_area(
-            "Ask a question",
-            placeholder="What can you tell me about the documents in the knowledge base?",
-            height=180,
-        )
+    prompt = st.text_area(
+        "Ask a question",
+        placeholder="What can you tell me about the documents in the knowledge base?",
+        height=180,
+    )
 
-        submit_button = st.button("Send question")
+    submit_button = st.button("Send question")
 
-        if submit_button and prompt:
-            with st.spinner("Querying backend..."):
-                try:
-                    response = post_question(api_url, prompt)
-                    answer = response.get("response", "No answer returned.")
-                    sources = response.get("sources", [])
-                    entry = {
-                        "prompt": prompt,
-                        "response": answer,
-                        "sources": sources,
-                    }
-                    st.markdown(f"**Response:**\n{answer}")
-                    st.session_state.history.insert(0, entry)
-                except requests.exceptions.RequestException as exc:
-                    st.error(f"Request failed: {exc}")
-                except ValueError as exc:
-                    st.error(f"Unexpected response: {exc}")
+    if submit_button and prompt:
+        with st.spinner("Querying backend..."):
+            try:
+                response = post_question(api_url, prompt)
+                answer = response.get("response", "No answer returned.")
+                sources = response.get("sources", [])
+                entry = {
+                    "prompt": prompt,
+                    "response": answer,
+                    "sources": sources,
+                }
+                st.markdown(f"**Response:**\n{answer}")
+                st.session_state.history.insert(0, entry)
+            except requests.exceptions.RequestException as exc:
+                st.error(f"Request failed: {exc}")
+            except ValueError as exc:
+                st.error(f"Unexpected response: {exc}")
 
-        if st.session_state.history:
-            st.markdown("---")
-            st.header("Conversation history")
-            for idx, entry in enumerate(st.session_state.history, 1):
-                st.subheader(f"Question {idx}")
-                st.markdown(f"**You asked:** {entry['prompt']}")
-                st.markdown(f"**Answer:** {entry['response']}")
-                if entry["sources"]:
-                    with st.expander("View retrieved sources"):
-                        for source in entry["sources"]:
-                            source_text = source.get('text', '')
-                            truncated_text = source_text[:300] + ('...' if len(source_text) > 300 else '')
-                            st.markdown(
-                                f"- **Source:** {source.get('source', 'unknown')}  \n"
-                                f"**Score:** {source.get('score', 'N/A')}  \n"
-                                f"**Text:** {truncated_text}"
-                            )
-
+    if st.session_state.history:
         st.markdown("---")
-        st.info(
-            "This UI is designed to support the project’s PDF-based Retrieval-Augmented Generation flow: "
-            "users submit a natural-language query, the backend retrieves relevant PDF context, and a Hugging Face model generates an answer." 
-        )
-    else:
-        st_autorefresh(interval=1000, limit=2)
+        st.header("Conversation history")
+        for idx, entry in enumerate(st.session_state.history, 1):
+            st.subheader(f"Question {idx}")
+            st.markdown(f"**You asked:** {entry['prompt']}")
+            st.markdown(f"**Answer:** {entry['response']}")
+            if entry["sources"]:
+                with st.expander("View retrieved sources"):
+                    for source in entry["sources"]:
+                        source_text = source.get('text', '')
+                        truncated_text = source_text[:300] + ('...' if len(source_text) > 300 else '')
+                        st.markdown(
+                            f"- **Source:** {source.get('source', 'unknown')}  \n"
+                            f"**Score:** {source.get('score', 'N/A')}  \n"
+                            f"**Text:** {truncated_text}"
+                        )
+
+    st.markdown("---")
+    st.info(
+        "This UI is designed to support the project’s PDF-based Retrieval-Augmented Generation flow: "
+        "users submit a natural-language query, the backend retrieves relevant PDF context, and a Hugging Face model generates an answer." 
+    )
+
 
 if __name__ == "__main__":
     render_app()
