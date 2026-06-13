@@ -1,14 +1,13 @@
 fastapi
 uvicorn
 transformers<5.0.0
-torchvision
-sentence-transformers
+sentence-transformers<=5.5.1
 tenacity
 python-dotenv
 langchain
 langchain-core
-# langchain-community==0.4.2
-langchain_huggingface
+# langchain-community
+langchain_huggingface<=1.2.2
 langchain-experimental
 langchain_google_genai
 tiktoken
