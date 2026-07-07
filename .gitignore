@@ -3,6 +3,6 @@
 /*.log*
 /tests/experimental.py
 /__pycache__/
-/streamlit_app.py
-/scripts/backend_startup.py
+streamlit_app.py
+scripts/backend_startup.py
 /vercel.json
