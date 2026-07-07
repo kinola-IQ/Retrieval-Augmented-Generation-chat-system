@@ -33,12 +33,10 @@ def create_app():
 
 
 # client application
-server = create_app()
+app = create_app()
 
-# if __name__ == '__main__':
-#     import os
-#     from dotenv import load_dotenv
-#     # api configuration
-#     host = os.environ.get("HOST","0.0.0.0")
-#     port = os.environ.get("PORT",8000)
-#     uvicorn.run('api.server:server', host=host, port=port, reload=True)
+if __name__ == '__main__':
+    # api configuration
+    host = os.environ.get("HOST","0.0.0.0")
+    port = os.environ.get("PORT",8000)
+    uvicorn.run('api.server:server', host=host, port=port, reload=True)

@@ -94,7 +94,8 @@ class RAGPipeline:
                 prompt,
                 max_length=45,
                 do_sample=True,
-                temperature=0.7
+                temperature=0.7,
+                pad_token_id=self.generator.piprline.tokenizer.eos_token_id
             )
 
             # Handle different output formats from transformers
