@@ -7,6 +7,6 @@ langchain-experimental
 openevals
 pinecone
 requests
-pandas
+pandas==2.3.2
 # streamlit
 # streamlit_autorefresh
