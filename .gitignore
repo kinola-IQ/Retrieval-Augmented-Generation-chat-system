@@ -2,4 +2,5 @@
 /motocura,AI chat box[1].pdf
 /*.log*
 /tests/experimental.py
-
+/__pycache__/
+/streamlit_app.py
