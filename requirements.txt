@@ -3,21 +3,11 @@ uvicorn
 transformers<5.0.0
 sentence-transformers<=5.5.1
 tenacity
-python-dotenv
-langchain
 langchain-core
-# langchain-community
 langchain_huggingface<=1.2.2
 langchain-experimental
-langchain_google_genai
-tiktoken
-pydantic
-pytest
-ragas
-langsmith
-ipykernel
 openevals
 pinecone
 requests
-streamlit
-streamlit_autorefresh
+# streamlit
+# streamlit_autorefresh
