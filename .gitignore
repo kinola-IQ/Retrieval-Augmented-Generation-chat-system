@@ -6,3 +6,4 @@
 streamlit_app.py
 scripts/backend_startup.py
 /vercel.json
+.vercel

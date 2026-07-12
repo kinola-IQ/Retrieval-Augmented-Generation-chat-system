@@ -34,9 +34,10 @@ def create_app():
 
 # client application
 app = create_app()
+server = app
 
 
-app.get('/health')
+@app.get('/health')
 def get_health():
     """get health status"""
     return {'status': 'healthy'}
@@ -45,6 +46,6 @@ def get_health():
 if __name__ == '__main__':
     import os
     # api configuration
-    host = os.environ.get("HOST","0.0.0.0")
-    port = os.environ.get("PORT",8501)
-    uvicorn.run('api.server:app', host=host, port=port, reload=True)
+    host = os.environ.get("HOST", "0.0.0.0")
+    port = int(os.environ.get("PORT", 8501))
+    uvicorn.run('api.server:server', host=host, port=port, reload=True)
