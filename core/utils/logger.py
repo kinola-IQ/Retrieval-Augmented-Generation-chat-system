@@ -2,19 +2,10 @@
 
 import logging
 import time
-from logging.handlers import RotatingFileHandler
-
-# Create a rotating file handler
-handler = RotatingFileHandler(
-    "/tmp/system.log",        # log file name
-    maxBytes=10000,    # rotate after ~10KB
-    backupCount=5     # keep 5 old log files
-)
 
 logging.basicConfig(
-    level=logging.DEBUG,
-    format="%(asctime)s - %(levelname)s - %(message)s",
-    handlers=[handler]
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
 # instantiating logger
