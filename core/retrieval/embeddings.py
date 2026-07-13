@@ -1,5 +1,5 @@
 """Handles Embedding generation"""
-from typing import List
+from typing import List, Literal
 from pathlib import Path
 import tiktoken
 from langchain_community.document_loaders import PyPDFLoader
@@ -22,8 +22,8 @@ embedding_model = huggingface_config()['embedding model']
 @timer
 def semantic_split(
     model: str = embedding_model,
-    breakpoint_threshold_type: str = 'gradient',
-    breakpoint_threshold_amount: float = 0.8
+    breakpoint_threshold_type: Literal['percentile', 'standard_deviation', 'interquartile', 'gradient'] = 'gradient',
+    breakpoint_threshold_amount: float = 0.8,
 ):
     """splits documents by semantic meaning"""
     # Initialize the SemanticChunker
