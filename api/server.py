@@ -47,5 +47,5 @@ if __name__ == '__main__':
     import os
     # api configuration
     host = os.environ.get("HOST", "0.0.0.0")
-    port = int(os.environ.get("PORT", 8501))
+    port = int(os.environ.get("PORT", 8080))
     uvicorn.run('api.server:server', host=host, port=port, reload=True)

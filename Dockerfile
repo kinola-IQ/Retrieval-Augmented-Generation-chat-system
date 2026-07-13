@@ -43,7 +43,7 @@ COPY --from=builder /app /home/appuser/app
 RUN chown -R appuser:appuser /home/appuser/app
 USER appuser
 
-EXPOSE 8501
+EXPOSE 8080
 
 # HUGGINGFACE
 ENV HUGGINGFACE_MODEL_NAME=facebook/bart-large-cnn
@@ -57,4 +57,4 @@ ENV PINECONE_NAMESPACE=chatbot
 ENV PINECONE_INDEX=Motocura
 
 
-CMD ["uvicorn", "api.server:app", "--host", "0.0.0.0", "--port", "8501", "--loop", "uvloop", "--workers", "1"]
+CMD ["uvicorn", "api.server:app", "--host", "0.0.0.0", "--port", "8080", "--loop", "uvloop", "--workers", "1"]
