@@ -1,14 +1,16 @@
 .env
-,gitignore
-.dvcignore
 README.md
 *.log
 *.yml
+*ake*
+*ignore
+*.json
 
 # development and CI/CD files
 tests/
 scripts/
 Design plans/
 data/
-.github/
-.dvc/
+build/
+source/
+.*/
