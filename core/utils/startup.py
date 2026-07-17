@@ -6,24 +6,29 @@ from tenacity import (
     wait_random_exponential,
     stop_after_attempt
 )
+from huggingface_hub import InferenceClient
 # custom modules
 from .helpers import timer
-from .config import pinecone_config
+from .config import pinecone_config, huggingface_config
 from ..generation.rag_pipeline import RAGPipeline
 
 # configuration
 pinecone_api_key = pinecone_config()['api key']
+hf_config = huggingface_config()
+hf_api_key = hf_config['api key']
+hf_embed_model = hf_config['embedding model']
 # database which holds all the answers
 VECTOR_DB = None
 CONFIGURED = False
 BOT = None
+EMBED_CLIENT = None
 
 
 @timer
 @retry(wait=wait_random_exponential(10, 40), stop=stop_after_attempt(5))
 async def make_connections():
     """initializes resources on startup"""
-    global VECTOR_DB, CONFIGURED, BOT
+    global VECTOR_DB, CONFIGURED, BOT, EMBED_CLIENT
     # Initialize resources here
     # vector database
     if pinecone_api_key is None:
@@ -34,6 +39,12 @@ async def make_connections():
 
     # rag pipeline
     BOT = RAGPipeline()
+
+    # embedding model
+    EMBED_CLIENT = InferenceClient(
+            model=hf_embed_model,
+            api_key=hf_api_key
+        )
 
     # status to inform us of successful connection on all parts
     CONFIGURED = True
