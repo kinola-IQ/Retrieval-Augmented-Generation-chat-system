@@ -22,13 +22,13 @@ VECTOR_DB = None
 CONFIGURED = False
 BOT = None
 EMBED_CLIENT = None
-
+HF_CLIENT = None
 
 @timer
 @retry(wait=wait_random_exponential(10, 40), stop=stop_after_attempt(5))
 async def make_connections():
     """initializes resources on startup"""
-    global VECTOR_DB, CONFIGURED, BOT, EMBED_CLIENT
+    global VECTOR_DB, CONFIGURED, BOT, EMBED_CLIENT, HF_CLIENT
     # Initialize resources here
     # vector database
     if pinecone_api_key is None:
@@ -45,6 +45,13 @@ async def make_connections():
             model=hf_embed_model,
             api_key=hf_api_key
         )
+    
+    # inference
+    HF_CLIENT = InferenceClient(
+        provider="hf-inference",
+        api_key=hf_api_key,
+    )
+
 
     # status to inform us of successful connection on all parts
     CONFIGURED = True
