@@ -6,13 +6,12 @@
 Motocura's Chatbot documentation
 ================================
 
-Add your content using ``reStructuredText`` syntax. See the
-`reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_
-documentation for details.
-
+A Python-based Retrieval-Augmented Generation (RAG) chatbot system 
+designed to combine document retrieval with generative AI for more accurate, 
+context-aware responses.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Api reference:
 
    api/modules
