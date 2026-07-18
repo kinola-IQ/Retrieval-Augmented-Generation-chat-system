@@ -9,5 +9,6 @@ pinecone
 requests
 pandas==2.3.2
 uvloop
+torch
 # streamlit
 # streamlit_autorefresh
