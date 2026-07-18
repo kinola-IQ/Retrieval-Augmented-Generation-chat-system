@@ -7,9 +7,9 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "Motocura's Chatbot"
-copyright = '2026, Omolayo-akinola Dumininuoluwa(Kinola-IQ)'
-author = 'Omolayo-akinola Dumininuoluwa(Kinola-IQ)'
-release = '7-14-2026'
+copyright = '2026, Omolayo-akinola Dumininuoluwa(kinola-iq)'
+author = 'Omolayo-akinola Dumininuoluwa(kinola-iq)'
+release = '7-16-2026'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

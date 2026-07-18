@@ -1,5 +1,5 @@
 .. Motocura's Chatbot documentation master file, created by
-   sphinx-quickstart on Tue Jul 14 20:10:36 2026.
+   sphinx-quickstart on Sat Jul 18 20:28:41 2026.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
@@ -14,3 +14,4 @@ documentation for details.
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
+
