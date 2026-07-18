@@ -5,13 +5,14 @@ from .llm import HUGGINGFACE
 from ..retrieval.retriever import retrieve_context
 from ..utils.logger import logger
 from ..utils.helpers import timer
-from ..utils.config import pinecone_config
-
+from ..utils.config import pinecone_config, huggingface_config
+from ..utils import startup
 
 class RAGPipeline:
     """Retrieval-Augmented Generation pipeline combining retrieval and generation."""
     VECTOR_DB_RESOURCES = pinecone_config()
     NAMESPACE = VECTOR_DB_RESOURCES['namespace']
+    MODEL = huggingface_config()['model']
 
     def __init__(self):
         """Initialize the RAG pipeline with model and retriever."""
@@ -88,24 +89,30 @@ class RAGPipeline:
                 logger.error("Pipeline not loaded")
                 return "Sorry, the model failed to load."
 
-            # Call pipeline with task-appropriate parameters
-            # Most text-generation tasks support these common parameters
-            outputs = self.generator.pipeline(
-                prompt,
-                max_length=45,
-                do_sample=True,
-                temperature=0.7,
-                pad_token_id=self.generator.piprline.tokenizer.eos_token_id
-            )
+            try:
+                outputs = self.generator.pipeline(
+                    prompt,
+                    max_length=45,
+                    do_sample=True,
+                    temperature=0.3,
+                    pad_token_id=self.generator.pipeline.model.config.eos_token_id
+                )
+            except Exception as e:
+                logger.error("Generation via transformers failed, fallback on API inference: %s", e)
+                outputs = startup.HF_CLIENT.summarization(
+                    text=prompt,
+                    model=RAGPipeline.MODEL
+                )
 
-            # Handle different output formats from transformers
+            # Handle different output formats
             if isinstance(outputs, list) and len(outputs) > 0:
                 if isinstance(outputs[0], dict):
-                    # Standard format: [{'generated_text': '...'}]
-                    return outputs[0].get('summary_text', str(outputs)).strip()
+                    # Prefer generated_text if available, else summary_text
+                    return outputs[0].get('generated_text') or outputs[0].get('summary_text', "").strip()
                 else:
-                    # Fallback for other formats
                     return str(outputs[0]).strip()
+            elif isinstance(outputs, dict):
+                return outputs.get('summary_text', "").strip()
             else:
                 return str(outputs).strip() if outputs else ""
         except Exception as e:

@@ -6,7 +6,7 @@ from tenacity import retry, wait_random_exponential, stop_after_attempt
 # custom modules
 from ..utils.config import huggingface_config
 from ..utils.helpers import timer
-
+from ..utils import startup
 
 class ModelProvider(ABC):
     """Abstract base class for model providers."""
