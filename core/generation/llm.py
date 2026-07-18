@@ -1,6 +1,6 @@
 """Wrapper for LLM calls"""
 from abc import ABC, abstractmethod
-from transformers import pipeline
+# from transformers import pipeline
 from tenacity import retry, wait_random_exponential, stop_after_attempt
 
 # custom modules

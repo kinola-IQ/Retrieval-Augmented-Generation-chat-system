@@ -16,8 +16,8 @@ class RAGPipeline:
 
     def __init__(self):
         """Initialize the RAG pipeline with model and retriever."""
-        self.generator = HUGGINGFACE()
-        self.generator.load_model()
+        #self.generator = HUGGINGFACE()
+        #self.generator.load_model()
 
     @timer
     async def generate_answer(

@@ -3,7 +3,7 @@ uvicorn
 # transformers<5.0.0
 # sentence-transformers
 tenacity
-transformers<5.0.0
+# transformers<5.0.0
 langchain_huggingface
 langchain-experimental
 openevals
