@@ -1,7 +1,7 @@
 fastapi
 uvicorn
-transformers<5.0.0
-sentence-transformers
+# transformers<5.0.0
+# sentence-transformers
 tenacity
 langchain_huggingface
 langchain-experimental
