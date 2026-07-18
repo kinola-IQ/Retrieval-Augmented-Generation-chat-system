@@ -85,9 +85,9 @@ class RAGPipeline:
     def _generate_response(self, prompt: str) -> str:
         """Generate response using the loaded model."""
         try:
-            if self.generator.pipeline is None:
-                logger.error("Pipeline not loaded")
-                return "Sorry, the model failed to load."
+            # if self.generator.pipeline is None:
+            #     logger.error("Pipeline not loaded")
+            #     return "Sorry, the model failed to load."
 
             try:
                 outputs = self.generator.pipeline(

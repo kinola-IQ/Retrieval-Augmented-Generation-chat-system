@@ -6,11 +6,11 @@ tenacity
 # transformers<5.0.0
 langchain_huggingface
 langchain-experimental
+huggingface_hub 
 openevals
 pinecone
 requests
 pandas==2.3.2
 uvloop
-torch
 # streamlit
 # streamlit_autorefresh
